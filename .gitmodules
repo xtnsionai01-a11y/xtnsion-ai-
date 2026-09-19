@@ -1,3 +1,6 @@
 [submodule ".agents/claude-gtm-plugin"]
 	path = .agents/claude-gtm-plugin
 	url = https://github.com/manojbajaj95/claude-gtm-plugin.git
+[submodule ".agents/claude-skills"]
+	path = .agents/claude-skills
+	url = https://github.com/alirezarezvani/claude-skills.git
