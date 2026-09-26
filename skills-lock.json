@@ -1,0 +1,359 @@
+{
+  "version": 1,
+  "skills": {
+    "add-bug": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/add-bug/SKILL.md",
+      "computedHash": "b2f174c96c4a6e9f0871f4cd9bd2fd24891b2a003c6076ebe9693424b0f71def"
+    },
+    "add-cli-option": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/add-cli-option/SKILL.md",
+      "computedHash": "9dd0ada90ba9ec4db014c194362fff32423063c50c3b8fe40c41b23edbb994b9"
+    },
+    "add-effect": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/add-effect/SKILL.md",
+      "computedHash": "c93fd7d5a1f1077d424e7ccf4cf782d2dcc6bddfe3f5e7a30f95e5e0da0677de"
+    },
+    "add-expert": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/add-expert/SKILL.md",
+      "computedHash": "c81e4d1028e2e71d7431a12b5b87ab24fa66d348048d6928c37f9bdf3ec046a1"
+    },
+    "add-new-package": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/add-new-package/SKILL.md",
+      "computedHash": "c3ab04d1f0a87641b45799768c43d4556246be19bc1459407400d5d486232aa6"
+    },
+    "add-sfx": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/add-sfx/SKILL.md",
+      "computedHash": "8af3535b81a3104ce811285c718d93fd0b3c736646d89bad6f98c40b046c219e"
+    },
+    "add-webcodecs-bug": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/add-webcodecs-bug/SKILL.md",
+      "computedHash": "8965436c0442e05447c90d72ee5bc41a8bcfb78e3b21733f2dec85520503ea1f"
+    },
+    "canvas-capture-extension": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/canvas-capture-extension/SKILL.md",
+      "computedHash": "82633cefd093c91c118a0bba5154e6faa2ddf5f852faad2165ea9dd3adc2ce73"
+    },
+    "checkout": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/checkout/SKILL.md",
+      "computedHash": "e60550d7ff9fd80200bd45dd8cdfea5601a896a214eb755e476d063538462608"
+    },
+    "convert": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/convert/SKILL.md",
+      "computedHash": "144c18763520a747f27114cc6013d601094bc8a5a6a754f3af237288238e7df7"
+    },
+    "deprecate-api": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/deprecate-api/SKILL.md",
+      "computedHash": "aab3e4d687134cf7cc7d6fa38d2b6e5621548816bee7d8730dfac0c21bd21fa4"
+    },
+    "docs": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/docs/SKILL.md",
+      "computedHash": "3657edfb27bef104b1ac3b73623f0df3ffea6ca8f1ab5bf6791035c672756865"
+    },
+    "docs-demo": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/docs-demo/SKILL.md",
+      "computedHash": "74a5a2d0d92d7575d784d6c7183aec29df7e1f664c59944f42bc1a1e650b8b8d"
+    },
+    "experts": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/experts/SKILL.md",
+      "computedHash": "1e37cb82d9d7d744b023238c7e12b4e3c44873219d0e8f08e6e11eb0c914dae9"
+    },
+    "find-unplanned-issues": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/find-unplanned-issues/SKILL.md",
+      "computedHash": "c2464742c3c9beec2c3fea940dee78f96d0242834c21c87895b8cc14eccf0f80"
+    },
+    "fix-dependabot": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/fix-dependabot/SKILL.md",
+      "computedHash": "4d2afd6cfbabd1e075c32f4b6607e80ca75ab4d79f4e145f1bd684735e09d557"
+    },
+    "flake": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/flake/SKILL.md",
+      "computedHash": "10b778002347f744ad5209e705801c15148f03660179030e0fd5b77277356ace"
+    },
+    "formatting": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/formatting/SKILL.md",
+      "computedHash": "80b8038a59f87abf1eb9157f6e3b2c41ff083b858e0c9be5dd255b52900a37cc"
+    },
+    "gh-stack": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/gh-stack/SKILL.md",
+      "computedHash": "e981c2da986a204d744b936fe6aed020b10db4b279065d5994ffe1662b3eb4ad"
+    },
+    "homepage-video-assets": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/homepage-video-assets/SKILL.md",
+      "computedHash": "6a86253338ccc3a19bc692bba1333589403a2e84b8ba31f31e3d39284dd1ea50"
+    },
+    "install-canvas-capture-browser": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/install-canvas-capture-browser/SKILL.md",
+      "computedHash": "bca3214d6b868fdc7daf4603d75dfb360a5a2aba15c44ff3eb56f277ae823b4b"
+    },
+    "interactivity-best-practices": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/interactivity-best-practices/SKILL.md",
+      "computedHash": "4cd29a50882f87a87ffa55fe8fc3885e757defdbd95318432e19052db4f84674"
+    },
+    "issue": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/issue/SKILL.md",
+      "computedHash": "080017e61e0a86a5cd42b7fd6730a3fa5f897279f18f699b8c39a0b430b458ea"
+    },
+    "issue-management": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/issue-management/SKILL.md",
+      "computedHash": "3cf0b9f0dabfb75d8533c71b9e41eda68418b908ab3bd2970a30dbc0266cb0fb"
+    },
+    "merge": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/merge/SKILL.md",
+      "computedHash": "1e86e11e5978e40e99a4fd11b63dc0942cbc77d2b60401eef74443e37b5dd2f7"
+    },
+    "no-pointer": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/no-pointer/SKILL.md",
+      "computedHash": "18909fec59d1757b121865d7fd27e91772c178e2f4e4b535164e4f446efa2de0"
+    },
+    "nullable-new-params": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/nullable-new-params/SKILL.md",
+      "computedHash": "b72c0028a53ebc3f03a2ca9e22ddb4389b51ffdfbed97fec214278cbc8f8687b"
+    },
+    "offload-r2": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/offload-r2/SKILL.md",
+      "computedHash": "02a7b2d234bd4412f9acc1ba6ec4fcbae13c6d18f925e6936e1e207e8c2e5e65"
+    },
+    "player-example": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/player-example/SKILL.md",
+      "computedHash": "a761460ae9d5b57fd2a88bee1924d4db743d531206b2a9194b45a481791cfab5"
+    },
+    "pr": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/pr/SKILL.md",
+      "computedHash": "6df372449af1539d706801b18c2e8f5f215cd611240b50be17368e3604341bcf"
+    },
+    "pr-name": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/pr-name/SKILL.md",
+      "computedHash": "ccb9c971676f87440cf7c55f28908e02738944a64ed6dd32bf662f2180d82638"
+    },
+    "pr-ready": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/pr-ready/SKILL.md",
+      "computedHash": "050292e76af706439263bac3fbd9860584a0417e48bfdace3cecbfd47b375ab0"
+    },
+    "react-scan": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/react-scan/SKILL.md",
+      "computedHash": "f1a40df950661a6b749ae03cef4e3148e3469d1d8481fb9af902ab436ba70b4f"
+    },
+    "release": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/release/SKILL.md",
+      "computedHash": "1631e7d4ad19c41319d4423253ab7898935ce43f21beddfd59d09368ec8470b1"
+    },
+    "scaffold-element": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/scaffold-element/SKILL.md",
+      "computedHash": "420c7b37ebeb51340231c7b17dee111e227e129ef2142959a972eb836b1a59c6"
+    },
+    "skill-locations": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/skill-locations/SKILL.md",
+      "computedHash": "c4e9ca4ac6df35e1536303a8c7fb534aff868657f8b3e7e34659eccaefb6dc85"
+    },
+    "studio": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/studio/SKILL.md",
+      "computedHash": "e30ac27950cfe45a6ccba8abd85d580e501aa3ebcb122142651b5bd5626d09bd"
+    },
+    "studio-config-option-lifecycle": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/studio-config-option-lifecycle/SKILL.md",
+      "computedHash": "a752878642899c10fefc9c29bfad9e71c515d93d5aaf6ebb7a3269489371ae04"
+    },
+    "studio-css-reset": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/studio-css-reset/SKILL.md",
+      "computedHash": "f8b1ecba55a3bbe082449f486ad925b4f5ef23e4a7a8d9138903923a250e843d"
+    },
+    "studio-mode": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/studio-mode/SKILL.md",
+      "computedHash": "8a1edeec3f8d30e8d262ea0f64be458eb3df125d1e93ddf0b83c270f75587c2b"
+    },
+    "studio-perf": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/studio-perf/SKILL.md",
+      "computedHash": "bd0d77f3d6cf525ff9df479806ac62b76e5c55395eb4a0bb30ec169d7692cfed"
+    },
+    "update-chrome-binaries-test-region": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/update-chrome-binaries-test-region/SKILL.md",
+      "computedHash": "4f2c9d3e6c46da8683f8327b645a64c2bb842abfc7c916cc1650364119c4da89"
+    },
+    "update-from-upstream-main": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/update-from-upstream-main/SKILL.md",
+      "computedHash": "22f93af6e5aefa0c7080d9c0bc54745f586086521eef7eea13f4e524ca9767a6"
+    },
+    "update-legal-pdfs": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/update-legal-pdfs/SKILL.md",
+      "computedHash": "80b3d8c14b771439d8b234552a53c023f4152b9ae28f09ca3f402f1ade8aa8ab"
+    },
+    "update-remotion-rust-ffmpeg": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/update-remotion-rust-ffmpeg/SKILL.md",
+      "computedHash": "8906fc567e29dfa90612335e1c9cf8e28171d92a5817f9cafc8119d96bab5201"
+    },
+    "update-stars": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/update-stars/SKILL.md",
+      "computedHash": "ca473ca87ee629826852076effc54a7f29099442787a056ba6262deb50c67528"
+    },
+    "update-version": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/update-version/SKILL.md",
+      "computedHash": "8420be03c02f01a18e5a2ced8eeaff92b8377cb71d3669ad62843fc6b82d9ed9"
+    },
+    "upgrade-caniuse": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/upgrade-caniuse/SKILL.md",
+      "computedHash": "640697bb1560975b16615c7aa880bf2d55de1e51baeaca356dd21935041d06fc"
+    },
+    "upgrade-mediabunny": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/upgrade-mediabunny/SKILL.md",
+      "computedHash": "504d76e3b3e824cd26fb2eb0c01feb5cfb7ee2ff4acdd7aa73294086d52f6275"
+    },
+    "upload-element-previews": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/upload-element-previews/SKILL.md",
+      "computedHash": "57ba82c27c08f98d2f6394781026fcb60ee6c47c71e15662951d08817346bbd7"
+    },
+    "upload-r2": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/upload-r2/SKILL.md",
+      "computedHash": "25082f8f3776beb7ccfcdd0a459b59b8b2b8a6e4337f64d07ae4c8ed3ffad157"
+    },
+    "v5-breaking-changes": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/v5-breaking-changes/SKILL.md",
+      "computedHash": "d67899453f604bd9a4224e3af2a0046c0d34ce2a254c019c1e810e2e11fbdee3"
+    },
+    "vercel": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/vercel/SKILL.md",
+      "computedHash": "45dbe03c43db99178abbc648b8468d1fa30d12796d181ea7cd0163cd3023e15c"
+    },
+    "version": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/version/SKILL.md",
+      "computedHash": "b43698e8a568f27d7671da8bcf8b902443d5b08fac1e4ef286b6cb9d8e2746e3"
+    },
+    "video-report": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/video-report/SKILL.md",
+      "computedHash": "b5cf9b7014112c070736b6d935fb6babf80eb9acec8363d9adc2e69ae9f50136"
+    },
+    "visual-mode": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/visual-mode/SKILL.md",
+      "computedHash": "302859399e1da304b58be971af7258d2caaca03cd63bfc5d290694f4b348fd70"
+    },
+    "web-renderer-test": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/web-renderer-test/SKILL.md",
+      "computedHash": "634bf2dd784bd72c6ae23dd1595aa541fa68a0efb79acbff8175185ba003fbb1"
+    },
+    "writing-docs": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/writing-docs/SKILL.md",
+      "computedHash": "1c2850e35ef2afce2c4035a5059b60ebabb70da6bc0ca1fef064a48ea366fe82"
+    },
+    "writing-tests": {
+      "source": "remotion-dev/remotion",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/writing-tests/SKILL.md",
+      "computedHash": "d8bdb82d8a7848a16558f4ee3db9b01b4763954acc2c629d9f93864b00402b06"
+    }
+  }
+}
