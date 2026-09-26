@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "hyperframes-cli": {
+      "source": "heygen-com/hyperframes",
+      "sourceType": "github",
+      "skillPath": "skills/hyperframes-cli/SKILL.md",
+      "computedHash": "d92017d4af95f729c0dadaa5835414fa8778ad3abadb5a2af21c0ac37cda3dbf"
+    }
+  }
+}
