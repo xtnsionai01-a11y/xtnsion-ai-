@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "minimal-run-and-audit": {
+      "source": "lllllllama/rigorpilot-skills",
+      "sourceType": "github",
+      "skillPath": "skills/minimal-run-and-audit/SKILL.md",
+      "computedHash": "7fbb056f1c6c06ac170f7d8f1f4c60656883886455407db478dce28954effb2c"
+    }
+  }
+}
