@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "ai-research-reproduction": {
+      "source": "lllllllama/rigorpilot-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ai-research-reproduction/SKILL.md",
+      "computedHash": "1fb3f36ce3f50059fd6c8581de41512cb87af018ad916033ff1d750e3a417468"
+    },
+    "minimal-run-and-audit": {
+      "source": "lllllllama/rigorpilot-skills",
+      "sourceType": "github",
+      "skillPath": "skills/minimal-run-and-audit/SKILL.md",
+      "computedHash": "7fbb056f1c6c06ac170f7d8f1f4c60656883886455407db478dce28954effb2c"
+    }
+  }
+}
