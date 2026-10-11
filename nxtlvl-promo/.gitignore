@@ -1,0 +1,4 @@
+.render/
+snaps/
+node_modules/
+__pycache__/
