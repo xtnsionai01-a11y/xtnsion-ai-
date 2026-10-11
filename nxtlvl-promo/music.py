@@ -1,7 +1,8 @@
-"""Synthesises the soundtrack + sound design for the nxtlvl.ai promo (33 s, 128 BPM), numpy only.
+"""Synthesises the soundtrack + sound design for the nxtlvl social promo (36 s, 120 BPM), numpy only.
 
-Every cue below is written in beats on the same grid the animation in index.html uses
-(bt(n) = n * 60/128 s), so hits, whooshes, clicks and the price drop land on picture.
+A smooth, glassy future-house bed: soft kick, airy claps, shakers, warm sub, lush pads and a
+ping-pong pluck arp, plus UI sound design (glass chimes, whooshes, bubble pops, notification dings)
+placed on the exact second marks the animation in index.html uses.
 Output: music.wav (48 kHz, stereo, 16-bit).
 """
 import sys
@@ -9,15 +10,11 @@ import wave
 import numpy as np
 
 SR = 48000
-DUR = 33.0
+DUR = 36.0
 N = int(SR * DUR)
-BPM = 128
-B = 60 / BPM
-rng = np.random.default_rng(7)
-
-
-def bt(n):
-    return n * B
+B = 0.5                     # 120 BPM
+BAR = 2.0
+rng = np.random.default_rng(11)
 
 
 def midi(m):
@@ -26,11 +23,6 @@ def midi(m):
 
 def tvec(d):
     return np.arange(int(d * SR)) / SR
-
-
-def wob(k):
-    """Deterministic 0..1 pseudo-random value."""
-    return float(np.sin(k * 12.9898) * 0.5 + 0.5)
 
 
 class Bus:
@@ -100,429 +92,310 @@ def saw(f, t, hmax=18, bright=0.22, phase=0.0):
     return (np.sin(2 * np.pi * f * t[:, None] * h[None, :] + phase * h[None, :]) * amp).sum(1)
 
 
-# ------------------------------------------------------------------ harmony: Am7 - Fmaj7 - C - G, one chord per bar
-PROG = [[57, 60, 64, 67], [53, 57, 60, 64], [55, 60, 64, 67], [55, 59, 62, 67]]
-ROOT = [33, 29, 36, 31]
-FINAL = [48, 55, 64, 71, 74, 79]          # Cmaj9, the resolution on the last hit
+# ------------------------------------------------------------------ harmony: Fmaj9 - Em7 - Dm9 - Cmaj9 (one per bar)
+PROG = [[53, 57, 60, 64, 67], [52, 55, 59, 62, 67], [50, 53, 57, 60, 64], [48, 55, 59, 62, 64]]
+ROOT = [41, 40, 38, 36]
+FINAL = [48, 55, 59, 62, 64, 67, 71]       # Cmaj9 add 13, the resolution
 
 
 def chord(bar):
     return PROG[bar % 4]
 
 
-def root(bar):
-    return ROOT[bar % 4]
-
-
 # ------------------------------------------------------------------ instruments
-def pad_note(m, d, bright=0.3):
+def pad_note(m, d, bright=0.4):
     t = tvec(d)
     out = np.zeros((2, len(t)))
-    for det, pan in [(-0.12, -0.75), (0.0, 0.0), (0.13, 0.75)]:
-        s = saw(midi(m + det), t, hmax=14, bright=bright, phase=rng.uniform(0, 6.28))
+    for det, pan in [(-0.1, -0.8), (0.0, 0.0), (0.11, 0.8)]:
+        s = saw(midi(m + det), t, hmax=12, bright=bright, phase=rng.uniform(0, 6.28))
+        s *= 1 + 0.12 * np.sin(2 * np.pi * (0.25 + 0.05 * pan) * t)
         a, b = np.cos((pan + 1) * np.pi / 4), np.sin((pan + 1) * np.pi / 4)
         out += np.stack([s * a, s * b])
-    return out * adsr(len(t), a=0.25, r=0.5)
+    return out * adsr(len(t), a=0.6, r=0.8)
 
 
-def stab(notes, d=0.26, bright=0.12):
-    t = tvec(d)
-    out = np.zeros((2, len(t)))
-    for m in notes:
-        for det, pan in [(-0.18, -0.9), (-0.07, -0.4), (0.0, 0.0), (0.08, 0.4), (0.17, 0.9)]:
-            s = saw(midi(m + 12 + det), t, hmax=16, bright=bright, phase=rng.uniform(0, 6.28))
-            a, b = np.cos((pan + 1) * np.pi / 4), np.sin((pan + 1) * np.pi / 4)
-            out += np.stack([s * a, s * b])
-    return out * np.exp(-t * 7) * adsr(len(t), a=0.004, r=0.05)
-
-
-def kick(punch=1.0):
-    t = tvec(0.5)
-    f = 44 + 140 * np.exp(-t * 32)
-    s = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 6.0)
-    click = fft_filter(rng.standard_normal(len(t)), lo=1500) * np.exp(-t * 350) * 0.5
-    return np.tanh((s + click) * 1.8 * punch)
+def kick():
+    t = tvec(0.42)
+    f = 46 + 110 * np.exp(-t * 30)
+    s = np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 7.5)
+    click = fft_filter(rng.standard_normal(len(t)), lo=1200, hi=6000) * np.exp(-t * 400) * 0.18
+    return np.tanh((s + click) * 1.3)
 
 
 def clap():
     t = tvec(0.35)
     n = rng.standard_normal(len(t))
     e = np.zeros(len(t))
-    for off in (0, 0.01, 0.021):
-        e += np.where(t >= off, np.exp(-(t - off) * 70), 0) * 0.6
-    e += np.where(t >= 0.03, np.exp(-(t - 0.03) * 13), 0)
-    return fft_filter(n * e, lo=900, hi=7000)
+    for off in (0, 0.012, 0.024):
+        e += np.where(t >= off, np.exp(-(t - off) * 80), 0) * 0.5
+    e += np.where(t >= 0.03, np.exp(-(t - 0.03) * 16), 0)
+    return fft_filter(n * e, lo=1100, hi=6500)
 
 
-def snare():
-    t = tvec(0.2)
-    body = np.sin(2 * np.pi * np.cumsum(190 + 60 * np.exp(-t * 40)) / SR) * np.exp(-t * 25)
-    nz = fft_filter(rng.standard_normal(len(t)), lo=1500, hi=9000) * np.exp(-t * 22)
-    return body * 0.5 + nz
+def shaker(acc=1.0):
+    t = tvec(0.09)
+    env = np.minimum(t / 0.012, 1) * np.exp(-t * 45)
+    return fft_filter(rng.standard_normal(len(t)), lo=6500, hi=14000) * env * acc
 
 
-def hat(open_=False):
-    t = tvec(0.28 if open_ else 0.07)
-    return fft_filter(rng.standard_normal(len(t)), lo=7500) * np.exp(-t * (12 if open_ else 80))
-
-
-def crash(d=1.8):
-    t = tvec(d)
-    n = fft_filter(rng.standard_normal(len(t)), lo=4500)
-    ring = sum(np.sin(2 * np.pi * f * t + rng.uniform(0, 6)) for f in (3215, 4471, 5831, 6922)) * 0.04
-    return (n + ring) * np.exp(-t * 2.6)
+def hat_open():
+    t = tvec(0.3)
+    return fft_filter(rng.standard_normal(len(t)), lo=8000) * np.exp(-t * 14)
 
 
 def bass_note(m, d):
     t = tvec(d)
     f = midi(m)
-    s = np.sin(2 * np.pi * f * t) + 0.3 * np.sin(4 * np.pi * f * t) + 0.12 * saw(f * 2, t, hmax=6, bright=0.5)
-    return np.tanh(s * 1.4) * adsr(len(t), a=0.004, r=0.04)
+    s = np.sin(2 * np.pi * f * t) + 0.18 * np.sin(4 * np.pi * f * t) + 0.06 * saw(f * 2, t, hmax=5, bright=0.6)
+    return np.tanh(s * 1.15) * adsr(len(t), a=0.01, r=0.08)
 
 
-def pluck(m, d=0.35):
+def pluck(m, d=0.6):
     t = tvec(d)
     f = midi(m)
     s = np.zeros(len(t))
-    for h in range(1, 10, 2):
-        s += np.sin(2 * np.pi * f * h * t) / (h * h) * np.exp(-t * (11 + h * 3))
-    s += 0.35 * np.sin(2 * np.pi * f * 2 * t) * np.exp(-t * 18)
-    return s * adsr(len(t), a=0.002, r=0.04)
+    for h in range(1, 8, 2):
+        s += np.sin(2 * np.pi * f * h * t) / (h * h) * np.exp(-t * (7 + h * 3))
+    s += 0.3 * np.sin(2 * np.pi * f * 2 * t) * np.exp(-t * 12)
+    return s * adsr(len(t), a=0.003, r=0.05)
 
 
-def bell(m, d=2.0):
+def bell(m, d=2.2):
     t = tvec(d)
     f = midi(m)
     s = np.zeros(len(t))
-    for ratio, amp, dec in [(1, 1, 2.4), (2.0, .5, 3.5), (2.76, .35, 5), (5.4, .2, 8), (8.93, .1, 12)]:
-        if f * ratio < 12000:
+    for ratio, amp, dec in [(1, 1, 2.0), (2.0, .45, 3.2), (2.76, .3, 4.5), (5.4, .14, 7)]:
+        if f * ratio < 11000:
             s += amp * np.sin(2 * np.pi * f * ratio * t) * np.exp(-t * dec)
-    return s * adsr(len(t), a=0.002, r=0.1)
+    return s * adsr(len(t), a=0.004, r=0.1)
 
 
-def riser(d, f0=300, f1=9000):
+def ding(m1=88, m2=95):
+    t = tvec(0.9)
+    s = np.sin(2 * np.pi * midi(m1) * t) * np.exp(-t * 6) * (t < 0.12)
+    t2 = np.clip(t - 0.11, 0, None)
+    s = s + np.sin(2 * np.pi * midi(m2) * t2) * np.exp(-t2 * 4.5) * (t >= 0.11)
+    return s * adsr(len(t), a=0.004, r=0.1)
+
+
+def whoosh(d=0.8, peak=4500, rev=False):
     t = tvec(d)
     p = t / d
-    s = svf(rng.standard_normal(len(t)), f0 * (f1 / f0) ** (p ** 1.6), q=2.4, mode='bp') * p ** 1.8
-    tone = np.sin(2 * np.pi * np.cumsum(180 * 5 ** (p ** 1.5)) / SR) * p ** 2 * 0.18
-    return s + tone
-
-
-def whoosh(d=0.6, peak=5500, rev=False):
-    t = tvec(d)
-    p = t / d
-    s = svf(rng.standard_normal(len(t)), 350 + peak * np.sin(np.pi * p) ** 2, q=1.6, mode='bp')
-    s *= np.sin(np.pi * np.clip(p * 1.1, 0, 1)) ** 2
+    s = svf(rng.standard_normal(len(t)), 300 + peak * np.sin(np.pi * p) ** 2, q=1.2, mode='bp')
+    s *= np.sin(np.pi * np.clip(p * 1.05, 0, 1)) ** 2
     return s[::-1].copy() if rev else s
 
 
-def swish(d=0.32):
+def glass_swish(d=1.0):
+    """Airy whoosh with a scatter of quiet high chimes — the glass transition sound."""
+    s = whoosh(d, 6000)
+    for k in range(6):
+        b = bell(96 + [0, 3, 7, 10, 12, 15][k], 0.9) * 0.05
+        i = int((0.15 + 0.1 * k) * d * SR)
+        s[i:i + len(b)] += b[:max(0, len(s) - i)]
+    return s
+
+
+def riser(d, f0=300, f1=7000):
     t = tvec(d)
     p = t / d
-    s = svf(rng.standard_normal(len(t)), 1500 + 9000 * p ** 0.6, q=2.0, mode='bp')
-    return s * np.sin(np.pi * p) ** 1.5
+    s = svf(rng.standard_normal(len(t)), f0 * (f1 / f0) ** (p ** 1.5), q=1.6, mode='bp') * p ** 2
+    return s
 
 
-def impact(d=2.6, big=1.0):
+def soft_impact(d=2.4, big=0.7):
     t = tvec(d)
-    boom = np.sin(2 * np.pi * np.cumsum(32 + 70 * np.exp(-t * 8)) / SR) * np.exp(-t * 1.8)
+    boom = np.sin(2 * np.pi * np.cumsum(36 + 50 * np.exp(-t * 7)) / SR) * np.exp(-t * 2.2)
     n = rng.standard_normal(len(t))
-    body = svf(n, 2600 * np.exp(-t * 3) + 250, q=0.8) * np.exp(-t * 3.2)
-    air = fft_filter(n, lo=5000) * np.exp(-t * 4.5) * 0.35
-    return np.tanh(boom * 1.5 * big) + body * 0.75 + air
+    body = fft_filter(n, lo=120, hi=1800) * np.exp(-t * 4.0) * 0.5
+    air = fft_filter(n, lo=4000, hi=12000) * np.exp(-t * 3.0) * 0.18
+    return np.tanh(boom * 1.2 * big) + body + air
 
 
-def thwack():
-    t = tvec(0.25)
-    body = np.sin(2 * np.pi * np.cumsum(140 + 260 * np.exp(-t * 30)) / SR) * np.exp(-t * 18)
-    nz = fft_filter(rng.standard_normal(len(t)), lo=700, hi=5500) * np.exp(-t * 28)
-    return np.tanh(body * 1.5 + nz * 0.9)
-
-
-def sub_drop(d=1.2):
+def pop(f0=500, f1=1100, d=0.1):
     t = tvec(d)
-    return np.sin(2 * np.pi * np.cumsum(30 + 70 * np.exp(-t * 3)) / SR) * np.exp(-t * 2.2) * adsr(len(t), a=0.005, r=0.2)
+    f = f0 + (f1 - f0) * (1 - np.exp(-t * 50))
+    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 38) * adsr(len(t), a=0.003, r=0.02)
 
 
-def ui_click(p=2400):
-    t = tvec(0.06)
-    return np.sin(2 * np.pi * p * t) * np.exp(-t * 90) * 0.7 + fft_filter(rng.standard_normal(len(t)), lo=3000) * np.exp(-t * 500) * 0.5
+def ui_click(p=2200):
+    t = tvec(0.05)
+    return np.sin(2 * np.pi * p * t) * np.exp(-t * 110) * 0.6 + fft_filter(rng.standard_normal(len(t)), lo=3000) * np.exp(-t * 600) * 0.3
 
 
-def tick(p=3000):
-    t = tvec(0.025)
-    return np.sin(2 * np.pi * p * t) * np.exp(-t * 260) + fft_filter(rng.standard_normal(len(t)), lo=4000) * np.exp(-t * 700) * 0.4
-
-
-def pop(f0=700, f1=1300, d=0.09):
-    t = tvec(d)
-    f = f0 + (f1 - f0) * (1 - np.exp(-t * 60))
-    return np.sin(2 * np.pi * np.cumsum(f) / SR) * np.exp(-t * 45)
-
-
-def bleep(f, d=0.03):
-    t = tvec(d)
-    return np.sign(np.sin(2 * np.pi * f * t)) * 0.5 * adsr(len(t), a=0.001, r=0.005)
-
-
-def thump():
-    t = tvec(0.16)
-    return np.sin(2 * np.pi * np.cumsum(60 + 90 * np.exp(-t * 35)) / SR) * np.exp(-t * 20)
-
-
-def stutter(notes, dur, at, bus, gain=0.6):
-    """Glitch stutter: a tiny grain of a chord stab retriggered faster and lower."""
-    grain = stab(notes, d=0.05)
-    n, tt = 0, 0.0
-    while tt < dur:
-        idx = np.arange(0, grain.shape[1] - 1, 1 - n * 0.045)
-        g = np.stack([np.interp(idx, np.arange(grain.shape[1]), c) for c in grain])
-        bus.add(g * adsr(g.shape[1], a=0.001, r=0.008), at + tt, gain * (0.8 if n % 2 else 1.0))
-        tt += 0.042 if n < 6 else 0.028
-        n += 1
+def tick(p=2600):
+    t = tvec(0.03)
+    return np.sin(2 * np.pi * p * t) * np.exp(-t * 220)
 
 
 # ------------------------------------------------------------------ arrangement
-pad, bass, drums, stabs, arp, fx, send = Bus(), Bus(), Bus(), Bus(), Bus(), Bus(), Bus()
+pad, bass, drums, arp, fx, send = Bus(), Bus(), Bus(), Bus(), Bus(), Bus()
 kicks = []
+GROOVE = (4.0, 31.3)
 
-for bar in range(17):
-    b0 = bar * 8
-    t0 = bt(b0)
-    final = bar >= 16
+for bar in range(18):
+    t0 = bar * BAR
+    final = t0 >= 32
     notes = FINAL if final else chord(bar)
-    d = (DUR - t0) if final else bt(8) + 0.4
+    d = (DUR - t0) if final else BAR + 0.9
+    if final and t0 > 32:
+        break
     for m in notes:
-        pad.add(pad_note(m, d, bright=0.55 if bar < 1 else 0.3), t0, 1.3 if final else 1.0)
+        pad.add(pad_note(m, d, bright=0.55 if bar < 2 else 0.4), t0, 0.95 if final else 1.0)
     if final:
-        bass.add(bass_note(24, DUR - t0) * np.exp(-tvec(DUR - t0) * 0.7), t0, 1.0)
+        bass.add(bass_note(36, DUR - t0) * np.exp(-tvec(DUR - t0) * 0.6), t0, 0.9)
         continue
-
-    groove = 8 <= b0 < 48 or 52 <= b0 < 64
-    for beat in range(8):
-        bb = b0 + beat
-        tb = bt(bb)
-        if groove:
+    in_groove = GROOVE[0] <= t0 < GROOVE[1]
+    for beat in range(4):
+        tb = t0 + beat * B
+        if in_groove and tb < GROOVE[1]:
             kicks.append(tb)
-            drums.add(kick(), tb, 1.0)
-            if beat % 2 == 1:
-                drums.add(clap(), tb, 0.55, pan=0.04)
-                send.add(clap(), tb, 0.25)
-            drums.add(hat(open_=True), tb + B / 2, 0.32, pan=0.25)
-            if bb >= 16:
-                for q in (0.25, 0.75):
-                    drums.add(hat(), tb + q * B, 0.16, pan=-0.3)
-            r = root(bar)
-            bass.add(bass_note(r, B * 0.22), tb, 0.75)
-            bass.add(bass_note(r + 12 if beat % 4 == 3 else r, B * 0.45), tb + B / 2, 1.0)
-    # syncopated chord stabs (16th positions) from the services section on
-    if (16 <= b0 < 48) or (52 <= b0 < 60):
-        for s16 in ((0, 3, 6, 10, 12, 14) if b0 >= 52 else (0, 3, 6, 10, 12)):
-            tt = t0 + s16 * B / 4
-            st = stab(notes)
-            stabs.add(st, tt, 1.0)
-            send.add(st * 0.4, tt, 0.6)
-    # 16th pluck arpeggio from the editor section on
-    if 28 <= b0 < 48 or 52 <= b0 < 64:
-        up = 12 if b0 >= 40 else 0
-        pat = [0, 1, 2, 3, 2, 1, 3, 2]
-        for k in range(32):
-            m = notes[pat[k % 8]] + 12 + up
-            g = 0.55 if k % 4 == 0 else 0.36
+            drums.add(kick(), tb, 0.9)
+            if beat % 2 == 1 and tb >= 10:
+                drums.add(clap(), tb, 0.45, pan=0.05)
+                send.add(clap(), tb, 0.45)
+            drums.add(hat_open(), tb + B / 2, 0.22, pan=0.3)
+            for q in range(4):
+                drums.add(shaker(1.0 if q % 2 else 0.55), tb + q * B / 4, 0.13, pan=-0.35)
+    if in_groove:
+        r = ROOT[bar % 4]
+        for pos, dur, g in ((0, 0.7, 1.0), (1.5, 0.4, 0.8), (2.0, 0.7, 0.9), (3.5, 0.4, 0.8)):
+            bass.add(bass_note(r, dur), t0 + pos * B, g)
+    # ping-pong pluck arp: 8ths in the body, 16ths through the pricing lift
+    if 4.0 <= t0 < 32:
+        pat = [0, 2, 4, 1, 3, 2, 4, 1]
+        step = B / 4 if 26 <= t0 < 32 else B / 2
+        n = int(BAR / step)
+        for k in range(n):
+            m = notes[pat[k % 8] % len(notes)] + 12
+            g = 0.5 if k % 2 == 0 else 0.34
             pl = pluck(m)
-            arp.add(pl, t0 + k * B / 4, g, pan=0.35 if k % 2 else -0.35)
-            send.add(pl, t0 + k * B / 4, g * 0.5)
+            arp.add(pl, t0 + k * step, g, pan=0.45 if k % 2 else -0.45)
+            send.add(pl, t0 + k * step, g * 0.6)
 
-# ------------------------------------------------------------------ intro (b0-b8): star ignite, word hammers, logo slam
-fx.add(impact(2.2, 0.6), 0.05, 0.6)
-fx.add(bell(84, 2.5), 0.06, 0.45); send.add(bell(84, 2.5), 0.06, 0.9)
-fx.add(bell(91, 2.0), 0.1, 0.25, pan=0.3); send.add(bell(91, 2.0), 0.1, 0.5)
-fx.add(whoosh(0.6), 0.0, 0.5, pan=-0.3)
-fx.add(riser(0.85, 400, 6000), bt(2) - 0.85, 0.35)
-for i in range(4):                                      # MOTION. VISUALS. BRANDS. NEXT LEVEL.
-    tb = bt(2 + i)
-    kicks.append(tb)
-    drums.add(kick(1.2), tb, 1.1)
-    fx.add(thwack(), tb, 0.85)
-    fx.add(sub_drop(0.6), tb, 0.5)
-    st = stab(chord(0), d=0.4)
-    stabs.add(st, tb, 1.3)
-    send.add(st, tb, 0.5)
-    fx.add(swish(0.18), tb - 0.17, 0.35, pan=(-0.6, 0.6, -0.3, 0.3)[i])
-fx.add(crash(1.5), bt(4), 0.5)
-fx.add(impact(2.4, 1.0), bt(6) + 0.3, 1.0)
-fx.add(crash(2.0), bt(6) + 0.3, 0.55)
-fx.add(sub_drop(1.2), bt(6) + 0.3, 0.7)
-kicks.append(bt(6) + 0.3)
-fx.add(whoosh(0.45, 7000), bt(6) - 0.12, 0.45, pan=0.6)     # star flies in
-stutter(chord(0), 0.16, bt(6) + 0.28, fx, 0.45)
-for i, m in enumerate([84, 88, 91, 96]):
-    fx.add(bell(m, 1.6), bt(6) + 0.32 + i * 0.04, 0.16, pan=-0.4 + i * 0.25)
-    send.add(bell(m, 1.6), bt(6) + 0.32, 0.25)
-for k in range(12):                                      # tagline scramble ticks
-    fx.add(tick(2500 + 900 * wob(k)), bt(6.6) + k * 0.045, 0.18, pan=0.2)
-for k in range(16):                                      # snare build into the hook
-    drums.add(snare(), bt(6.6) + k * B * 0.0825, 0.12 + 0.03 * k)
-fx.add(riser(bt(8) - bt(6.8), 300, 10000), bt(6.8), 0.55)
-fx.add(crash(1.2)[::-1].copy(), bt(8) - 1.2, 0.35)        # reverse cymbal
-fx.add(whoosh(0.55, 6500), bt(7.4), 0.55, pan=0.3)        # star wipe
+# ------------------------------------------------------------------ sound design on picture
+def chime_run(at, notes, gap=0.07, gain=0.18, verb=0.4):
+    for i, m in enumerate(notes):
+        b = bell(m, 1.8)
+        fx.add(b, at + i * gap, gain, pan=-0.5 + i / max(1, len(notes) - 1))
+        send.add(b, at + i * gap, verb)
 
-# ------------------------------------------------------------------ hook (b8-b16)
-fx.add(impact(2.4, 1.0), bt(8), 0.9); fx.add(crash(2.0), bt(8), 0.5)
-for i in range(5):                                       # words fly in
-    fx.add(swish(0.16), bt(8.5 + i * 0.5) - 0.12, 0.3, pan=-0.5 + i * 0.25)
-    fx.add(thump(), bt(8.5 + i * 0.5), 0.35)
-fx.add(pop(600, 1200), bt(10.75), 0.35)
-fx.add(whoosh(0.4, 7000), bt(11.35), 0.55)
-stutter(chord(2), 0.18, bt(11.4), fx, 0.4)
-fx.add(swish(0.5), bt(12) - 0.05, 0.5, pan=0.7); fx.add(swish(0.5), bt(12.1) - 0.05, 0.4, pan=-0.7)
-fx.add(pop(500, 1100, 0.12), bt(12.15), 0.45)
-for b in (13, 13.75, 14.5):                              # slot machine
-    for k in range(5):
-        fx.add(tick(2200 + k * 250), bt(b) - 0.2 + k * 0.04, 0.25, pan=0.2)
-    fx.add(bell(91, 0.8), bt(b) + 0.02, 0.18)
-    fx.add(pop(900, 1500), bt(b), 0.3)
-fx.add(swish(0.55), bt(15.55), 0.8, pan=-0.2)            # whip pan
-fx.add(whoosh(0.5, 8000), bt(15.6), 0.4, pan=0.5)
+# intro
+fx.add(whoosh(1.2, 3000), 0.1, 0.35, pan=-0.2)
+chime_run(0.45, [84, 88, 91], 0.09, 0.16, 0.5)                 # glass panel appears
+for i in range(6):                                           # letters rise
+    p = pluck(72 + [0, 4, 7, 11, 12, 16][i], 0.8)
+    fx.add(p, 0.9 + i * 0.07, 0.22, pan=-0.5 + i * 0.2); send.add(p, 0.9 + i * 0.07, 0.3)
+chime_run(1.5, [91, 95, 98, 103], 0.06, 0.14, 0.5)              # star sparkle
+for k in range(10):                                          # tagline shimmer
+    fx.add(tick(3200 + k * 140), 1.75 + k * 0.045, 0.06, pan=-0.4 + k * 0.08)
+fx.add(riser(1.2, 300, 6000), 2.8, 0.25)
+fx.add(glass_swish(1.3), 3.3, 0.5)                           # panel morph
+fx.add(soft_impact(2.4, 0.7), 4.0, 0.55)
 
-# ------------------------------------------------------------------ services (b16-b28)
-fx.add(crash(1.8), bt(16), 0.45)
+# hook
+chime_run(4.1, [79, 84], 0.08, 0.12, 0.3)
+for i in range(6):                                           # chips pop in
+    fx.add(pop(450 + i * 60, 950 + i * 90), 4.6 + i * 0.12, 0.28, pan=(-0.7, 0.7, -0.6, 0.6, -0.5, 0.5)[i])
+fx.add(whoosh(0.8, 3500), 6.7, 0.3, pan=0.3)                    # headline swap
+fx.add(whoosh(0.8, 3500, rev=True), 7.1, 0.25, pan=-0.3)
+fx.add(glass_swish(1.3), 9.3, 0.55)                          # chips morph into cards
 for i in range(6):
-    fx.add(pop(500 + i * 90, 1000 + i * 160), bt(16.2) + i * 0.09, 0.32, pan=-0.6 + i * 0.24)
-fx.add(ui_click(2400), bt(25.5), 0.55)
-fx.add(riser(0.85, 500, 12000), bt(26.4), 0.6)
-fx.add(whoosh(0.7, 8000), bt(26.5), 0.5)
-fx.add(impact(2.2, 0.9), bt(27.6), 0.85)
-kicks.append(bt(27.6))
+    fx.add(pop(380 + i * 50, 800 + i * 80, 0.12), 10.5 + i * 0.06, 0.22, pan=-0.6 + i * 0.24)
 
-# ------------------------------------------------------------------ editor (b28-b40)
-fx.add(whoosh(0.9, 4500), bt(32), 0.55, pan=-0.3)        # layers explode
+# services: spotlight tour pings
+for i, at in enumerate([11.1, 11.8, 12.5, 13.2, 13.9, 14.6]):
+    b = bell([84, 86, 88, 91, 93, 96][i], 1.4)
+    fx.add(b, at, 0.16, pan=(-0.5, 0, 0.5, -0.5, 0.3, 0.6)[i]); send.add(b, at, 0.35)
+fx.add(glass_swish(1.2), 15.2, 0.5)                          # card expands into the studio
+fx.add(soft_impact(2.0, 0.55), 16.2, 0.4)
+
+# studio
+for i in range(4):
+    fx.add(pop(500 + i * 70, 1000 + i * 120), 17.3 + i * 0.25, 0.2, pan=(-0.6, 0.6, -0.6, 0.6)[i])
+fx.add(whoosh(1.2, 3000), 18.4, 0.4, pan=-0.3)                  # layers separate
 for i in range(3):
-    fx.add(ui_click(1600 + i * 400) * 0.8, bt(32.1 + i * 0.1) + 0.35, 0.4, pan=0.3)
+    fx.add(ui_click(1500 + i * 300), 18.6 + i * 0.08 + 0.5, 0.25, pan=0.3)
 for i in range(4):
-    fx.add(pop(800 + i * 150, 1400 + i * 200), bt(33 + i * 0.5), 0.3, pan=0.4)
-fx.add(whoosh(0.75, 4500, rev=True), bt(35.25) - 0.1, 0.55)   # layers collapse
-fx.add(impact(1.8, 0.8), bt(36), 0.7)
-kicks.append(bt(36))
-fx.add(ui_click(2400), bt(37.5), 0.55)
-fx.add(pop(600, 1200, 0.12), bt(37.75), 0.4)
-for i, m in enumerate([84, 88, 91]):
-    fx.add(bell(m, 1.4), bt(38.9) + i * 0.05, 0.22)
-    send.add(bell(m, 1.4), bt(38.9), 0.4)
-stutter(chord(9), bt(40) - bt(39.4), bt(39.4), fx, 0.5)   # glitch transition
-for k in range(16):
-    fx.add(bleep(600 + 2400 * wob(k + 40)), bt(39.4) + k * 0.05, 0.12, pan=np.sin(k) * 0.6)
+    fx.add(pop(700 + i * 120, 1300 + i * 180, 0.08), 19.25 + i * 0.1, 0.18, pan=0.4)
+fx.add(whoosh(1.0, 3000, rev=True), 19.9, 0.4)                  # layers reassemble
+fx.add(ui_click(2200), 21.0, 0.4)
+fx.add(pop(550, 1150, 0.12), 21.1, 0.3)
+fx.add(ding(88, 95), 21.95, 0.3); send.add(ding(88, 95), 21.95, 0.4)
 
-# ------------------------------------------------------------------ creative wall (b40-b48)
-fx.add(impact(2.2, 1.0), bt(40), 0.85); fx.add(crash(1.8), bt(40), 0.5)
-fx.add(whoosh(0.8, 5000), bt(40), 0.45)
-for i in range(5):
-    fx.add(thump(), bt(41 + i * 0.5), 0.4)
-    fx.add(swish(0.14), bt(41 + i * 0.5) - 0.1, 0.25, pan=-0.4 + i * 0.2)
-fx.add(riser(1.0, 600, 12000), bt(47.5) - 0.7, 0.5)
-fx.add(whoosh(0.35, 9000), bt(47.5), 0.6)
+# glass slab wipe
+fx.add(glass_swish(1.3), 21.65, 0.65, pan=0.0)
+fx.add(whoosh(1.2, 7000), 21.75, 0.25, pan=0.5)
 
-# ------------------------------------------------------------------ process build (b48-b52)
-for i in range(4):
-    tb = bt(48 + i)
-    kicks.append(tb)
-    drums.add(kick(1.15), tb, 1.0)
-    fx.add(thwack(), tb, 0.8)
-    stabs.add(stab(chord(12), d=0.35), tb, 1.2)
-    fx.add(swish(0.16), tb - 0.14, 0.35, pan=(-0.5, 0.5, 0, 0.3)[i])
-fx.add(crash(1.0), bt(50), 0.4)
-roll, tt = [], bt(48)
-while tt < bt(51.7):                                     # accelerating snare roll
-    p = (tt - bt(48)) / (bt(51.7) - bt(48))
-    roll.append(tt)
-    tt += B * (0.5 if p < 0.25 else 0.25 if p < 0.55 else 0.125 if p < 0.8 else 0.0625)
-for k, r in enumerate(roll):
-    drums.add(snare(), r, 0.18 + 0.5 * k / len(roll))
-fx.add(riser(bt(51.7) - bt(48), 250, 12000), bt(48), 0.6)
-for k in range(10):                                      # price scramble bleeps
-    fx.add(bleep(900 + 2200 * wob(k + 90), 0.025), bt(51.6) + k * 0.034, 0.18)
+# phones + notifications
+fx.add(whoosh(1.0, 2500), 22.1, 0.35)
+for i, at in enumerate([23.4, 23.95, 24.5, 25.05]):
+    d = ding(*[(86, 93), (88, 95), (84, 91), (89, 96)][i])
+    fx.add(d, at, 0.22, pan=(-0.6, 0.6, -0.6, 0.6)[i]); send.add(d, at, 0.3)
+fx.add(whoosh(0.9, 3000), 26.35, 0.35)
+fx.add(riser(1.0, 400, 7000), 25.9, 0.22)
 
-# ------------------------------------------------------------------ pricing drop (b52-b60)
-fx.add(impact(2.8, 1.25), bt(52), 1.15); fx.add(crash(2.4), bt(52), 0.65)
-fx.add(sub_drop(1.5), bt(52), 0.9)
-stutter(chord(13), 0.1, bt(52), fx, 0.4)
-for col, dur in enumerate((0.75, 0.87, 0.99)):           # rolling digits
-    for k in range(1, 20):
-        p = 1 - (1 - k / 19) ** 0.25
-        fx.add(tick(2600 + col * 500), bt(52) + p * dur, 0.16, pan=(-0.4, 0, 0.4)[col])
-for i, m in enumerate([84, 88, 91, 96, 100]):            # confetti shimmer
-    fx.add(bell(m, 2.0), bt(52) + 0.05 + i * 0.05, 0.2, pan=-0.6 + i * 0.3)
-    send.add(bell(m, 2.0), bt(52) + 0.05 + i * 0.05, 0.35)
-fx.add(pop(500, 1000), bt(52.4), 0.3); fx.add(pop(600, 1250), bt(52.7), 0.35)
-fx.add(whoosh(0.55, 5000), bt(54) - 0.05, 0.5)
-for i in range(4):
-    fx.add(pop(800 + i * 140, 1500 + i * 220), bt(55 + i * 0.5) + 0.08, 0.38, pan=-0.2)
-fx.add(ui_click(2400), bt(58.25), 0.6)
-for i, m in enumerate([88, 91, 96, 100]):
-    fx.add(bell(m, 1.5), bt(58.28) + i * 0.04, 0.2, pan=-0.4 + i * 0.25)
-    send.add(bell(m, 1.5), bt(58.28), 0.35)
-fx.add(riser(bt(60) - bt(59.0), 400, 11000), bt(59.0), 0.55)
-fx.add(whoosh(0.5, 6000), bt(59.4), 0.5)
+# pricing
+fx.add(whoosh(1.2, 2600), 26.9, 0.4)
+fx.add(soft_impact(2.2, 0.6), 27.1, 0.4)
+for k in range(1, 26):                                       # eased count-up ticks
+    p = k / 25
+    at = 27.5 + 1.5 * (1 - (1 - p) ** (1 / 3))
+    fx.add(tick(1800 + 1400 * p), at, 0.07, pan=0.1)
+chime_run(29.0, [88, 95], 0.07, 0.14, 0.4)
+for i in range(4):                                           # features tick in
+    fx.add(pop(700 + i * 90, 1350 + i * 160), 28.55 + i * 0.4, 0.26, pan=-0.2)
+fx.add(ui_click(2300), 30.6, 0.45)
+chime_run(30.62, [91, 95, 98, 103, 107], 0.05, 0.12, 0.45)       # sparkle burst
+fx.add(glass_swish(1.4), 31.2, 0.55)                         # card morphs into the outro panel
 
-# ------------------------------------------------------------------ outro (b60-)
-fx.add(impact(2.6, 1.1), bt(60), 1.0); fx.add(crash(2.2), bt(60), 0.55)
-fx.add(whoosh(0.45, 7000), bt(60.2) - 0.05, 0.4, pan=0.6)
-fx.add(impact(2.0, 0.8), bt(60) + 0.5, 0.6)
-kicks.append(bt(60) + 0.5)
-fx.add(bell(91, 2.2), bt(60) + 0.55, 0.3); send.add(bell(91, 2.2), bt(60) + 0.55, 0.6)
-for i in range(7):
-    fx.add(tick(1800 + i * 120) * 0.7, bt(62) + i * 0.05, 0.18)
-fx.add(pop(600, 1200), bt(63), 0.35); fx.add(pop(700, 1400), bt(63) + 0.1, 0.35)
-fx.add(impact(3.0, 1.0), bt(64), 0.9); fx.add(crash(3.0), bt(64), 0.5)
-kicks.append(bt(64))
-for i, m in enumerate([84, 88, 91, 96]):
-    fx.add(bell(m, 2.6), bt(64) + i * 0.06, 0.24, pan=-0.4 + i * 0.25)
-    send.add(bell(m, 2.6), bt(64) + i * 0.06, 0.6)
-fx.add(whoosh(0.9, 6000), bt(64), 0.35, pan=0.5)
+# outro
+fx.add(soft_impact(3.0, 0.8), 32.2, 0.5)
+for i in range(6):
+    p = pluck(72 + [0, 4, 7, 11, 12, 16][i], 0.9)
+    fx.add(p, 32.25 + i * 0.06, 0.2, pan=-0.5 + i * 0.2); send.add(p, 32.25 + i * 0.06, 0.35)
+chime_run(32.75, [91, 95, 98, 103], 0.06, 0.14, 0.55)
+fx.add(pop(500, 1000), 33.6, 0.25); fx.add(pop(600, 1200), 33.74, 0.25)
+fx.add(whoosh(1.2, 6000), 34.2, 0.22, pan=0.4)
+chime_run(34.8, [96, 103], 0.08, 0.12, 0.5)
 
 # ------------------------------------------------------------------ mix
 tt = np.arange(N) / SR
 duck = np.ones(N)
 for k in kicks:
     i = int(k * SR)
-    duck[i:] = np.minimum(duck[i:], 1 - 0.62 * np.exp(-(tt[i:] - k) / 0.1))
+    duck[i:] = np.minimum(duck[i:], 1 - 0.45 * np.exp(-(tt[i:] - k) / 0.12))
 
-gap = np.ones(N)                                         # the silent beat before the price drop
-g0, g1 = int(bt(51.72) * SR), int(bt(52) * SR)
-gap[g0:g1] = 0.0
-gap[g0 - 480:g0] = np.linspace(1, 0, 480)
-
-pad_auto = np.interp(tt, [0, bt(2), bt(8), bt(48), bt(51.7), bt(52), bt(64), DUR], [0.35, 0.8, 0.7, 0.7, 1.0, 0.7, 1.0, 1.0])
-pad_x = np.stack([fft_filter(c, lo=150, hi=6000) for c in pad.x]) * pad_auto * duck
-bass_x = bass.x * duck
-stab_x = np.stack([fft_filter(c, lo=250, hi=9000) for c in stabs.x]) * (0.45 + 0.55 * duck)
-arp_x = np.stack([fft_filter(c, lo=300) for c in arp.x]) * (0.6 + 0.4 * duck)
+pad_auto = np.interp(tt, [0, 3.5, 4.0, 31.0, 32.0, DUR], [0.55, 0.9, 0.75, 0.75, 1.0, 1.0])
+pad_x = np.stack([fft_filter(c, lo=140, hi=5200) for c in pad.x]) * pad_auto * duck
+bass_x = np.stack([fft_filter(c, hi=900) for c in bass.x]) * duck
+arp_x = np.stack([fft_filter(c, lo=300, hi=9000) for c in arp.x]) * (0.7 + 0.3 * duck)
 dly = int(0.75 * B * SR)
 echo = np.zeros_like(arp_x)
-for n_rep, g in enumerate([0.3, 0.15, 0.07], start=1):
+for n_rep, g in enumerate([0.35, 0.2, 0.1, 0.05], start=1):
     s = dly * n_rep
-    echo[0, s:] += arp_x[1, :-s] * g
-    echo[1, s:] += arp_x[0, :-s] * g
+    echo[0 if n_rep % 2 else 1, s:] += arp_x[1 if n_rep % 2 else 0, :-s] * g
 arp_x = arp_x + echo
 
-stems = [norm_rms(pad_x, -22.5), norm_rms(bass_x, -19.5), norm_rms(drums.x, -18.5),
-         norm_rms(stab_x, -23), norm_rms(arp_x, -27.5), norm_rms(fx.x, -20.5)]
+stems = [norm_rms(pad_x, -21.5), norm_rms(bass_x, -20.5), norm_rms(drums.x, -21.0),
+         norm_rms(arp_x, -25.5), norm_rms(fx.x, -22.5)]
 
-ir_t = tvec(2.4)
-ir = np.stack([fft_filter(rng.standard_normal(len(ir_t)), lo=200, hi=7000) for _ in range(2)]) * np.exp(-ir_t * 2.8)
+ir_t = tvec(3.0)
+ir = np.stack([fft_filter(rng.standard_normal(len(ir_t)), lo=250, hi=6500) for _ in range(2)]) * np.exp(-ir_t * 2.0)
 ir /= np.sqrt(np.sum(ir ** 2, axis=1, keepdims=True))
 nfft = 1 << (N + len(ir_t) - 1).bit_length()
 wet = np.stack([np.fft.irfft(np.fft.rfft(send.x[c], nfft) * np.fft.rfft(ir[c], nfft), nfft)[:N] for c in range(2)])
 
-mix = sum(stems) * gap + norm_rms(wet, -26)
-mix = np.stack([fft_filter(c, lo=28) for c in mix])
-mix = np.tanh(mix * 1.25) / np.tanh(1.25)
+mix = sum(stems) + norm_rms(wet, -24.5)
+mix = np.stack([fft_filter(c, lo=30) for c in mix])
+mix = np.tanh(mix * 1.1) / np.tanh(1.1)
 fade = np.ones(N)
-fade[:240] = np.linspace(0, 1, 240)
-fo = int((DUR - 0.65) * SR)
-fade[fo:] = np.linspace(1, 0, N - fo) ** 1.6
+fi = int(0.8 * SR)
+fade[:fi] = np.linspace(0, 1, fi) ** 1.5
+fo = int((DUR - 0.8) * SR)
+fade[fo:] = np.linspace(1, 0, N - fo) ** 1.5
 mix *= fade
-mix *= 10 ** (-1.5 / 20) / np.max(np.abs(mix))
+mix *= 10 ** (-3.2 / 20) / np.max(np.abs(mix))
 
 out = sys.argv[1] if len(sys.argv) > 1 else 'music.wav'
 with wave.open(out, 'wb') as w:
