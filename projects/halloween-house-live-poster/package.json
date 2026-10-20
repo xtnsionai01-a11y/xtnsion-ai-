@@ -1,0 +1,20 @@
+{
+  "name": "halloween-house-live-poster",
+  "version": "1.0.0",
+  "description": "Halloween House invite poster as a 12 s seamless live poster with sound",
+  "scripts": {
+    "masks": "python3 tools/build_masks.py assets/poster.webp assets",
+    "audio": "python3 tools/build_audio.py assets/sfx assets/soundtrack.wav",
+    "render": "node tools/render.mjs --fps 30 --out work/video_30fps.mp4",
+    "export": "tools/export.sh work/video_30fps.mp4 assets/soundtrack.wav output"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "gsap": "^3.13.0",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  },
+  "private": true
+}
