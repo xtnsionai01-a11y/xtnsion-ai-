@@ -9,10 +9,10 @@ out="$3"
 name=halloween-house-live-poster
 mkdir -p "$out"
 
-# Film grain is expensive to encode; capping at 9 Mb/s keeps each file under
-# WhatsApp's 16 MB limit with no visible loss.
-enc=(-c:v libx264 -preset slow -crf 18 -maxrate 9M -bufsize 18M -tune film
-     -profile:v high -pix_fmt yuv420p -r 30
+# Film grain is expensive to encode; capping at 9.5 Mb/s keeps each 12 s file
+# under WhatsApp's 16 MB limit with no visible loss.
+enc=(-c:v libx264 -preset slow -crf 18 -maxrate 9500k -bufsize 19M -tune film
+     -profile:v high -level 4.2 -pix_fmt yuv420p
      -c:a aac -b:a 192k -ar 48000 -movflags +faststart -shortest)
 
 # 9:16 for Reels, Stories and WhatsApp status

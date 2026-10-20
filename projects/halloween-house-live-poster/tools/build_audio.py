@@ -144,6 +144,41 @@ hit = np.sin(2 * np.pi * np.cumsum(freq) / SR) * np.exp(-ht * 2.2)
 hit = np.tanh(hit * 2.2) / np.tanh(2.2)
 place(mix, hit, 6.0, gain=0.42)
 
+# --- lettering: a buzz and crackle as the title's lights fail before the strike,
+# glassy sparkles as letters light up (times follow src/text.js)
+from scipy.signal import butter, lfilter
+bn = int(1.02 * SR)
+bt = np.arange(bn) / SR
+saw = 2 * ((bt * 100) % 1) - 1
+b_, a_ = butter(2, [180, 2400], "bandpass", fs=SR)
+buzz = lfilter(b_, a_, saw) * (bt / bt[-1]) ** 2.2
+buzz[-int(0.02 * SR):] *= np.linspace(1, 0, int(0.02 * SR))
+place(mix, buzz / np.abs(buzz).max(), 4.95, gain=0.05, pan=0.0)
+b_, a_ = butter(2, [1800, 7000], "bandpass", fs=SR)
+for j in range(26):  # one crackle each time a letter cuts out or sputters back
+    for dt in (0.0, 0.05, 0.11):
+        n = int(rng.uniform(0.008, 0.025) * SR)
+        burst = lfilter(b_, a_, rng.standard_normal(n)) * np.hanning(n)
+        place(mix, burst / (np.abs(burst).max() + 1e-9), 5.33 + j * 0.017 + dt,
+              gain=rng.uniform(0.04, 0.09), pan=rng.uniform(-0.5, 0.5))
+
+
+def sparkle(freq, length=0.9):
+    st = np.arange(int(length * SR)) / SR
+    tone = sum(a * np.sin(2 * np.pi * freq * r * st) for r, a in [(1, 1), (2.76, 0.4), (5.4, 0.15)])
+    return tone * np.exp(-st * 6) * np.minimum(st / 0.003, 1)
+
+
+notes = [1568, 1760, 2093, 2349, 2637, 3136]
+for k in range(12):  # TRICK OR TREAT, letter by letter
+    place(mix, sparkle(notes[k % 6] * (1 if k < 6 else 2)), 0.33 + k * 0.055, gain=0.012,
+          pan=-0.6 + k * 0.1)
+    place(verb, sparkle(notes[k % 6]), 0.33 + k * 0.055, gain=0.02)
+for k in range(7):  # the date glows from its centre outwards
+    place(mix, sparkle(notes[(k + 2) % 6] * 1.5, 1.4), 9.82 + k * 0.04, gain=0.02,
+          pan=(-1) ** k * k * 0.12)
+    place(verb, sparkle(notes[(k + 2) % 6] * 1.5, 1.4), 9.82 + k * 0.04, gain=0.035)
+
 # --- recorded effects -----------------------------------------------------------
 fx = {name: load(name) for name in ["thunder_long", "bats", "owl", "door", "bell", "ambience"]}
 

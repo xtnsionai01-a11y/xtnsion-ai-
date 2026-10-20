@@ -11,8 +11,13 @@ masks2.png  R = "HOUSE" lettering
 masks3.png  R = soft glow around "HOUSE"
             G = soft glow around the cream lettering
             B = illustrated scene area (what a lightning flash lights up)
+masks4.png  R = "HALLOWEEN" region, G = "HOUSE" region, B = the three small lines
+letters.png 1024 x 8 lookup, one row per text line: R = global letter index of
+            each column, G = 255 where the line has a letter
+letters.json  the text lines, their rows and letter ranges, for the animation
 noise.png   three channels of tileable fBm noise (period = texture size)
 """
+import json
 import sys
 from pathlib import Path
 
@@ -130,6 +135,56 @@ cream_glow = ndimage.gaussian_filter(cream, 8)
 scene = ndimage.gaussian_filter(rect(60, 705, 965, 1240), 18)
 save("masks3.png", [house_glow / house_glow.max(), cream_glow / cream_glow.max(), scene])
 
+
+# --- per-letter lookup for the text animation -----------------------------------
+# Lines whose letters are spaced apart are split on empty columns; the two
+# display words have touching serifs, so their splits were placed by eye.
+LINES = [
+    # name, row, y range, mask, explicit splits (None = split on gaps)
+    ("trick", 0, (215, 270), "cream", None),
+    ("halloween", 1, (272, 655), "cream", [257, 335, 401, 462, 540, 650, 724, 798]),
+    ("house", 2, (500, 705), "orange", [388, 487, 581, 676]),
+    ("invite", 3, (1262, 1300), "cream", None),
+    ("date", 4, (1365, 1400), "cream", None),
+]
+binary = {"cream": (lum > 90) & (R / (G + 1) < 1.45), "orange": (R > 90) & (R / (G + 1) > 1.5)}
+lookup = np.zeros((8, W, 3), np.uint8)
+regions = {}
+bands = {}
+meta = []
+index = 0
+for name, row, (y0, y1), kind, cuts in LINES:
+    band = np.zeros((H, W), bool)
+    band[y0:y1] = binary[kind][y0:y1]
+    if name == "house":
+        band[:, :270] = band[:, 770:] = False
+    cols = np.nonzero(band.any(0))[0]
+    x0, x1 = int(cols.min()), int(cols.max())
+    if cuts is None:  # split halfway across each empty gap
+        gaps, _ = ndimage.label(~band.any(0)[x0:x1 + 1])
+        cuts = [x0 + int(np.mean(np.nonzero(gaps == g)[0])) for g in range(1, gaps.max() + 1)]
+    edges = [x0 - 6] + cuts + [x1 + 7]
+    letters = []
+    for i in range(len(edges) - 1):
+        lo, hi = max(edges[i], 0), min(edges[i + 1], W)
+        lookup[row, lo:hi, 0] = index + i
+        lookup[row, lo:hi, 1] = 255
+        letters.append([lo, hi])
+    meta.append({"name": name, "row": row, "first": index, "count": len(letters),
+                 "letters": letters})
+    index += len(letters)
+    bands[name] = band
+    region = ndimage.binary_fill_holes(ndimage.binary_dilation(band, iterations=6))
+    regions[name] = ndimage.gaussian_filter(region.astype(np.float32), 1.2)
+
+# HALLOWEEN and HOUSE nearly touch; keep each word's region off the other's ink
+# so a moving letter never drags pieces of its neighbour along.
+regions["halloween"] *= 1 - ndimage.binary_dilation(bands["house"], iterations=2)
+regions["house"] *= 1 - ndimage.binary_dilation(bands["halloween"], iterations=2)
+small = np.maximum.reduce([regions["trick"], regions["invite"], regions["date"]])
+save("masks4.png", [regions["halloween"], regions["house"], small])
+Image.fromarray(lookup).save(OUT / "letters.png")
+(OUT / "letters.json").write_text(json.dumps({"lines": meta, "total": index}, indent=1))
 
 # --- tileable noise ----------------------------------------------------------
 def fbm_tile(n, beta, lo, hi, seed):

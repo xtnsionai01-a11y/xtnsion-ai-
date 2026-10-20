@@ -114,17 +114,21 @@ export function drawBat(ctx, x, y, span, flap, roll, rim) {
   const dx = MOON.x - x, dy = MOON.y - y;
   const d = Math.hypot(dx, dy) || 1;
   const rimOffset = Math.max(2.2, span * 0.035);
-  for (const pass of rim ? [0, 1] : [1]) {
+  // The moonlit rim is the silhouette stacked a few times towards the moon at
+  // falling strength, which gives a soft edge that widens on the bats closest
+  // to camera (a blur filter looks the same but renders far slower).
+  const steps = rim ? Math.min(14, Math.max(3, Math.round(rimOffset * 1.2))) : 0;
+  const passes = Array.from({ length: steps }, (_, i) => [1.4 * (1 - i / steps), 0.2]);
+  passes.push([0, 1]);
+  for (const [k, alpha] of passes) {
     ctx.save();
-    if (pass === 0) ctx.translate(x + (dx / d) * rimOffset, y + (dy / d) * rimOffset);
-    else ctx.translate(x, y);
+    ctx.translate(x + (dx / d) * rimOffset * k, y + (dy / d) * rimOffset * k);
     ctx.rotate(roll);
     ctx.scale(span, span);
     ctx.beginPath();
     batPath(ctx, flap);
-    ctx.fillStyle = pass === 0 ? rim : "#070302";
-    // the moonlit rim is a soft glow that widens on the bats closest to camera
-    ctx.filter = pass === 0 ? `blur(${Math.max(0.6, span * 0.014)}px)` : "none";
+    ctx.globalAlpha = k === 0 ? 1 : alpha;
+    ctx.fillStyle = k === 0 ? "#070302" : rim;
     ctx.fill("nonzero");
     ctx.restore();
   }

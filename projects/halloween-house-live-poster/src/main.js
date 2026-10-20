@@ -2,6 +2,7 @@ import * as THREE from "three";
 import { gsap } from "gsap";
 import { vertexShader, fragmentShader } from "./shader.js";
 import { BatLayer, SWARM_SPAN } from "./bats.js";
+import { createLetters, addTextTimeline, writeLetterUniforms } from "./text.js";
 
 export const LOOP = 12;
 const STAGE = { w: 1080, h: 1920 };
@@ -15,8 +16,9 @@ const RENDER_MODE = params.has("render");
 // ---------------------------------------------------------------------------
 const fx = {
   gust: 0.35, gold: 0, blood: 0, moonGlow: 1, flash: 0, punch: 0,
-  door: 1, figureX: 540, line: 0, burst: 0,
+  door: 1, figureX: 540, line: 0, burst: 0, sheen: -200, tremble: 0, lineDraw: 1,
 };
+let letters = null; // per-letter state, added once assets/letters.json loads
 
 const tl = gsap.timeline({ paused: true, defaults: { ease: "sine.inOut" } });
 tl.addLabel("bell", 0.15)
@@ -75,12 +77,11 @@ renderer.setSize(STAGE.w, STAGE.h, false);
 renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
 
 const loader = new THREE.TextureLoader();
-const load = (url, repeat = false) =>
+const load = (url, { repeat = false, nearest = false } = {}) =>
   loader.loadAsync(url).then((t) => {
     t.colorSpace = THREE.NoColorSpace;
     t.generateMipmaps = false;
-    t.minFilter = THREE.LinearFilter;
-    t.magFilter = THREE.LinearFilter;
+    t.minFilter = t.magFilter = nearest ? THREE.NearestFilter : THREE.LinearFilter;
     if (repeat) t.wrapS = t.wrapT = THREE.RepeatWrapping;
     return t;
   });
@@ -99,7 +100,9 @@ const batsBack = canvasTexture(bats.back);
 
 const uniforms = {
   tPoster: { value: null }, tMask1: { value: null }, tMask2: { value: null },
-  tMask3: { value: null }, tNoise: { value: null },
+  tMask3: { value: null }, tNoise: { value: null }, tText: { value: null }, tLetters: { value: null },
+  uLetters: { value: Array.from({ length: 64 }, () => new THREE.Vector4(0, 0, 1, 1)) },
+  uSheen: { value: -200 }, uLineDraw: { value: 1 },
   tBatsFront: { value: batsFront }, tBatsBack: { value: batsBack },
   uStage: { value: new THREE.Vector2(STAGE.w, STAGE.h) },
   uPoster: { value: new THREE.Vector4(POSTER.x, POSTER.y, POSTER.w, POSTER.h) },
@@ -132,6 +135,9 @@ function renderAt(t, frame = Math.round(t * 60)) {
   u.uDoor.value = fx.door;
   u.uFigureX.value = fx.figureX;
   u.uLine.value = fx.line;
+  u.uLineDraw.value = fx.lineDraw;
+  u.uSheen.value = fx.sheen;
+  if (letters) writeLetterUniforms(u.uLetters.value, letters, t, LOOP, fx);
   bats.draw(t, LOOP, fx);
   batsFront.needsUpdate = true;
   batsBack.needsUpdate = true;
@@ -140,13 +146,19 @@ function renderAt(t, frame = Math.round(t * 60)) {
 
 const ready = Promise.all([
   load("./assets/poster.webp"), load("./assets/masks1.png"), load("./assets/masks2.png"),
-  load("./assets/masks3.png"), load("./assets/noise.png", true),
-]).then(([poster, m1, m2, m3, noise]) => {
+  load("./assets/masks3.png"), load("./assets/noise.png", { repeat: true }),
+  load("./assets/masks4.png"), load("./assets/letters.png", { nearest: true }),
+  fetch("./assets/letters.json").then((r) => r.json()),
+]).then(([poster, m1, m2, m3, noise, m4, letterMap, letterMeta]) => {
   uniforms.tPoster.value = poster;
   uniforms.tMask1.value = m1;
   uniforms.tMask2.value = m2;
   uniforms.tMask3.value = m3;
   uniforms.tNoise.value = noise;
+  uniforms.tText.value = m4;
+  uniforms.tLetters.value = letterMap;
+  letters = createLetters(letterMeta);
+  addTextTimeline(tl, letters, fx);
   renderAt(0);
 });
 

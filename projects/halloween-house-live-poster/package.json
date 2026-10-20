@@ -5,8 +5,8 @@
   "scripts": {
     "masks": "python3 tools/build_masks.py assets/poster.webp assets",
     "audio": "python3 tools/build_audio.py assets/sfx assets/soundtrack.wav",
-    "render": "node tools/render.mjs --fps 30 --out work/video_30fps.mp4",
-    "export": "tools/export.sh work/video_30fps.mp4 assets/soundtrack.wav output"
+    "render": "node tools/render.mjs --fps 60 --out work/video_60fps.mp4",
+    "export": "tools/export.sh work/video_60fps.mp4 assets/soundtrack.wav output"
   },
   "license": "UNLICENSED",
   "dependencies": {
