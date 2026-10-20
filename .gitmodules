@@ -1,3 +1,31 @@
 [submodule ".agents/claude-gtm-plugin"]
 	path = .agents/claude-gtm-plugin
 	url = https://github.com/manojbajaj95/claude-gtm-plugin.git
+[submodule ".agents/gsap-skills"]
+	path = .agents/gsap-skills
+	url = https://github.com/greensock/gsap-skills.git
+	shallow = true
+[submodule ".agents/claudedesignskills"]
+	path = .agents/claudedesignskills
+	url = https://github.com/freshtechbro/claudedesignskills.git
+	shallow = true
+[submodule ".agents/anime"]
+	path = .agents/anime
+	url = https://github.com/juliangarnier/anime.git
+	shallow = true
+[submodule ".agents/three.js"]
+	path = .agents/three.js
+	url = https://github.com/mrdoob/three.js.git
+	shallow = true
+[submodule ".agents/react-three-fiber"]
+	path = .agents/react-three-fiber
+	url = https://github.com/pmndrs/react-three-fiber.git
+	shallow = true
+[submodule ".agents/satori"]
+	path = .agents/satori
+	url = https://github.com/vercel/satori.git
+	shallow = true
+[submodule ".agents/FFmpeg"]
+	path = .agents/FFmpeg
+	url = https://github.com/FFmpeg/FFmpeg.git
+	shallow = true
